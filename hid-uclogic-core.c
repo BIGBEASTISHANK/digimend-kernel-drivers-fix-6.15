@@ -25,6 +25,11 @@
 #include "compat.h"
 #include <linux/version.h>
 
+/* Compatibility for kernel 6.15+ timer API changes */
+#if LINUX_VERSION_CODE > KERNEL_VERSION(6, 14, 0)
+#define del_timer_sync timer_delete_sync
+#endif
+
 /**
  * uclogic_inrange_timeout - handle pen in-range state timeout.
  * Emulate input events normally generated when pen goes out of range for
@@ -491,7 +496,7 @@ static void uclogic_remove(struct hid_device *hdev)
 {
 	struct uclogic_drvdata *drvdata = hid_get_drvdata(hdev);
 
-	timer_delete_sync(&drvdata->inrange_timer);
+	del_timer_sync(&drvdata->inrange_timer);
 	hid_hw_stop(hdev);
 	kfree(drvdata->desc_ptr);
 	uclogic_params_cleanup(&drvdata->params);
